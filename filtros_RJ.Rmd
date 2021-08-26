@@ -1,0 +1,91 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+library(srvyr)
+library("dplyr")
+library("readxl")
+library(survival)
+library(survey)
+library(flexsurv)
+library(devtools)
+BaseBR2015 = read.csv2(file = 'PENSE.csv',header=T, sep=";")
+attach(BaseBR2015)
+i = 1 
+tempo = c()
+censura = c()
+while (i <= length(BaseBR2015$VB08002)){
+  
+  if (BaseBR2015$VB08002[i] == -1){
+    
+    tempo = append(tempo,BaseBR2015$VB01003[i])
+    censura = append(censura, 0)
+    i = i + 1
+  }  
+  
+  
+  else if (BaseBR2015$VB08002[i]>=9 && BaseBR2015$VB08002[i]<=18){
+    
+    tempo = append(tempo,BaseBR2015$VB08002[i])
+    censura = append(censura, 1)
+    i = i + 1
+  }
+    
+  
+  else if (BaseBR2015$VB08002[i] == 99 || BaseBR2015$VB08001[i] == 99){
+    tempo = append(tempo, NA)
+    censura = append(censura, NA) # o ERRO ESTÃ NO NA COMO STRING
+    i = i + 1
+    
+  }
+}
+  
+BaseBR2015 <- transform(BaseBR2015, tempo=tempo, censura=censura)
+names(BaseBR2015)
+
+desenho = svydesign(id =~ escola,
+                    
+  strata =~ ESTRATOGEOREG,
+  weights =~ as.numeric(PESO),
+  data = BaseBR2015,
+  nest = T)
+
+```
+
+```{r}
+amostra = BaseBR2015 %>% filter (MUNICIPIO_CAP == 3304557)
+```
+
+# Não vai dar para expandir, rodar com a amostra
+```{r}
+
+# Sexo
+df = data.frame(amostra$VB01001)
+colnames(df) = c("Sexo")
+
+# NOS ÚLTIMOS 12 MESES com que frequência tem se sentido sozinho(a)? 
+df = transform( df, Solitude = amostra$VB12001)
+
+# Alguma vez na vida, você já fumou cigarro, mesmo uma ou duas tragadas?  
+df = transform( df, Fumou = amostra$VB04001)
+
+# Algum de seus pais ou responsáveis fuma? 
+
+df = transform( df, Pais_Fumante = amostra$VB04006A)
+
+# Quantos amigos seus usam drogas? 
+
+df = transform( df, amigod_drogados = amostra$VB06006)
+
+# Alguma vez na vida você tomou uma dose de bebida alcoólica? (Uma dose equivale a uma lata de cerveja ou uma taça de vinho ou uma dose de cachaça ou uísque etc)
+
+df = transform( df, Ja_bebeu = amostra$VB05002)
+
+write.csv(df, "Testes_ML_classi.csv", row.names = FALSE)
+```
+
+
