@@ -62,23 +62,22 @@ amostra = BaseBR2015 %>% filter (UFCENSO == 33)
 
 # Não vai dar para expandir, rodar com a amostra
 ```{r}
-
-# Sexo
 df = data.frame(amostra$VB01001)
 colnames(df) = c("Sexo")
 
-# trabalha 
-df = data.frame(amostra$VB01011)
-colnames(df) = c("trabalha")
 
-df = data.frame(amostra$VB01026)
-colnames(df) = c("pos_estudos")
 
-df = data.frame(amostra$VB13005)
-colnames(df) = c("saude")
+df = transform(df, trabalha = amostra$VB01011)
 
-df = data.frame(amostra$VB13005)
-colnames(df) = c("engravidou")
+
+
+df = transform(df, pos_estudos = amostra$VB01026)
+
+
+df = transform(df, saude = amostra$VB13005)
+
+
+df = transform(df, engravidou = amostra$VB08013)
 
 
 # NOS ÚLTIMOS 12 MESES com que frequência tem se sentido sozinho(a)? 
@@ -98,6 +97,7 @@ df = transform(df, idade = amostra$VB01003 )
 # Alguma vez na vida você tomou uma dose de bebida alcoólica? (Uma dose equivale a uma lata de cerveja ou uma taça de vinho ou uma dose de cachaça ou uísque etc)
 df = transform( df, Ja_bebeu = amostra$VB05002)
 write.csv(df, "Testes_ML_classi_RJESTADO.csv", row.names = FALSE)
+
 ```
 
 
